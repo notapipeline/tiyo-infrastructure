@@ -1,0 +1,60 @@
+---
+- name: Install Docker container engine
+  include_tasks: pkg.yml
+
+- name: Make directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+  with_items:
+    - /etc/docker
+    - /etc/systemd/system/docker.service.d
+
+- name: Copy Docker engine service file
+  register: change_docker
+  template:
+    src: "docker.service.j2"
+    dest: "{{ systemd_dir }}/docker.service"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Copy Docker environment config file
+  template:
+    src: docker.j2
+    dest: "{{ system_env_dir }}/docker"
+
+- name: Copy the proxy environment file
+  template:
+    src: proxy.conf.j2
+    dest: /etc/systemd/system/docker.service.d/proxy.conf
+
+- name: Copy daemon config file
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+
+- name: Add any insecure registries to Docker config
+  when: insecure_registries is defined and insecure_registries | length > 0
+  lineinfile:
+    dest: "{{ system_env_dir }}/docker"
+    regexp: "^INSECURE_REGISTRY="
+    line: "INSECURE_REGISTRY={% for reg in insecure_registries %}--insecure-registry={{ reg }} {% endfor %}"
+
+- name: Add registry to Docker config
+  when: add_registry is defined and add_registry > 0
+  lineinfile:
+    dest: "{{ system_env_dir }}/docker"
+    regexp: "^ADD_REGISTRY="
+    line: "ADD_REGISTRY={% for reg in add_registry %}--add-registry={{ reg }} {%endfor %}"
+
+- name: Enable and check Docker service
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: started
+    enabled: yes
+  register: started_docker

@@ -3,8 +3,13 @@ resource vsphere_virtual_machine filestore {
   resource_pool_id     = vsphere_vapp_container.vapp_container.id
   datastore_cluster_id = var.datastore.id
 
-  num_cpus = 1
+  num_cpus = 2
   memory   = 2048
+
+  cpu_hot_add_enabled    = true
+  cpu_hot_remove_enabled = true
+  memory_hot_add_enabled = true
+
   guest_id = data.vsphere_virtual_machine.template.guest_id
 
   disk {
@@ -31,7 +36,8 @@ resource vsphere_virtual_machine filestore {
   }
 
   network_interface {
-    network_id = data.vsphere_network.network.id
+    network_id   = data.vsphere_network.network.id
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
   }
 
   clone {

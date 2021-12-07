@@ -1,0 +1,4 @@
+---
+# tasks file for aws-standard-linux
+- name: Install Standard Configuration
+  include_tasks: install.yml

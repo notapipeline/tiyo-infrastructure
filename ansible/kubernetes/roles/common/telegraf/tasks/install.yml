@@ -1,0 +1,60 @@
+---
+# Agent tasks
+
+- name: Install influxdb repository
+  yum_repository:
+    name: influxdb
+    description: InfluxDB Repository - RHEL $releasever
+    baseurl: https://repos.influxdata.com/rhel/$releasever/$basearch/stable
+    gpgcheck: yes
+    gpgkey: https://repos.influxdata.com/influxdb.key
+
+- name: Install telegraf
+  package:
+    name: telegraf
+    state: latest
+
+- name: Get telegraf caps
+  command:
+    cmd: getcap /usr/bin/telegraf
+  register: telegraf_cap
+  changed_when: false
+
+- name: Set telegraf caps
+  command:
+    cmd: setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/telegraf
+  when: telegraf_cap.stdout != "/usr/bin/telegraf = cap_net_bind_service+eip"
+  notify:
+    - restart_telegraf
+
+- name: Copy config
+  template:
+    src: "aws-telegraf-agent.conf.j2"
+    dest: /etc/telegraf/telegraf.conf
+    owner: telegraf
+    group: telegraf
+    mode: 0644
+    backup: yes
+  notify:
+    - restart_telegraf
+  
+- name: Add Inputs
+  template:
+     src: "inputs/{{ item }}.conf.j2"
+     dest: "/etc/telegraf/telegraf.d/{{ item }}.conf"
+     owner: telegraf
+     group: telegraf
+     mode: 0644
+     backup: yes
+  with_items:
+    - http_put
+    - internal_metrics
+  notify: 
+     - restart_telegraf 
+
+- name: Set Remote Syslog
+  lineinfile: 
+    path: /etc/rsyslog.conf
+    line: "*.*     @@99.80.84.209"
+  notify:
+     - restart_syslog 

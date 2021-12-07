@@ -1,0 +1,27 @@
+---
+ansible_user: "{{ lookup('env', 'SSH_COMPARTMENT_USER') }}"
+ansible_ssh_private_key_file: "{{ lookup('env', 'SSH_COMPARTMENT_KEY') }}"
+
+manage_lvm: true
+lvm_groups:
+  - vgname: sequencer-vg
+    disks:
+      - /dev/sdb
+      - /dev/sdc
+    create: true
+    lvnames:
+      - lvname: sequencer
+        size: '100%FREE'
+        create: true
+        filesystem: ext4
+        mount: true
+        mntp: /mnt/sequencer
+
+nfs_exports:
+  - "/mnt/sequencer *(rw,fsid=0)"
+  - "/mnt/sequencer/data *(rw,sync,no_root_squash)"
+  - "/mnt/sequencer/influx *(rw,sync,no_root_squash)"
+  - "/mnt/sequencer/elastic *(rw,sync,no_root_squash)"
+  - "/mnt/sequencer/redis-master *(rw,sync,no_root_squash)"
+  - "/mnt/sequencer/redis-slave *(rw,sync,no_root_squash)"
+

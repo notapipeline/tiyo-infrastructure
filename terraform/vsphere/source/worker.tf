@@ -5,7 +5,12 @@ resource vsphere_virtual_machine worker {
   datastore_cluster_id = var.datastore.id
 
   num_cpus = 4
-  memory   = 4096
+  memory   = 16384
+
+  cpu_hot_add_enabled    = true
+  cpu_hot_remove_enabled = true
+  memory_hot_add_enabled = true
+
   guest_id = data.vsphere_virtual_machine.template.guest_id
 
   disk {
@@ -23,8 +28,10 @@ resource vsphere_virtual_machine worker {
     unit_number      = 1
   }
 
+  wait_for_guest_net_timeout = 0
   network_interface {
-    network_id = data.vsphere_network.network.id
+    network_id   = data.vsphere_network.network.id
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
   }
 
   clone {

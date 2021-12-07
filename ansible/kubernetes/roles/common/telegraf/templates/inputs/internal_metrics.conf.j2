@@ -1,0 +1,38 @@
+[[inputs.internal]]
+  ## If true, collect telegraf memory stats.
+  collect_memstats = true
+  [inputs.internal.tags]
+    monitoring = "internal_monitoring"
+
+[[inputs.cpu]]
+  ## Whether to report per-cpu stats or not
+  percpu = true
+  ## Whether to report total system cpu stats or not
+  totalcpu = true
+  ## If true, collect raw CPU time metrics.
+  collect_cpu_time = false
+  ## If true, compute and report the sum of all non-idle CPU states.
+  report_active = false
+  [inputs.cpu.tags]
+    monitoring = "internal_monitoring"
+
+[[inputs.disk]]
+  # mount_points = ["/"]
+  ## Ignore mount points by filesystem type.
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+  [inputs.disk.tags]
+    monitoring = "internal_monitoring"
+[[inputs.mem]]
+  # no configuration
+  [inputs.mem.tags]
+    monitoring = "internal_monitoring"
+
+[[inputs.system]]
+  [inputs.system.tags]
+    monitoring = "internal_monitoring"
+[[inputs.diskio]]
+  [inputs.diskio.tags]
+    monitoring = "internal_monitoring"
+[[inputs.swap]]
+  [inputs.swap.tags]
+    monitoring = "internal_monitoring"

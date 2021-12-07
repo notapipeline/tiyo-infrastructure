@@ -6,6 +6,11 @@ resource vsphere_virtual_machine master {
 
   num_cpus = 2
   memory   = 4096
+
+  cpu_hot_add_enabled    = true
+  cpu_hot_remove_enabled = true
+  memory_hot_add_enabled = true
+
   guest_id = data.vsphere_virtual_machine.template.guest_id
 
   disk {
@@ -16,7 +21,8 @@ resource vsphere_virtual_machine master {
   }
 
   network_interface {
-    network_id = data.vsphere_network.network.id
+    network_id   = data.vsphere_network.network.id
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
   }
 
   clone {

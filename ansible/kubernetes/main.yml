@@ -1,0 +1,87 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - vars/main.yml
+  roles:
+    - { role: common/centos, tags: centos }
+
+- hosts: filestore
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: Setup LVM
+      include_role:
+        name: filestore/lvm
+
+    - name: Create export directories
+      file:
+        path: "{{ seqpath.split(' ')[0] }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0777
+      loop: "{{ nfs_exports }}"
+      loop_control:
+        loop_var: seqpath
+
+    - name: Setup NFS
+      include_role:
+        name: filestore/nfs
+
+- hosts: filestore
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - vars/main.yml
+  roles:
+    - { role: docker, tags: fsdocker }
+
+- hosts: cluster
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - vars/main.yml
+  roles:
+    - { role: docker, tags: docker }
+
+- hosts: master
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - vars/main.yml
+  roles:
+    - { role: kubernetes/master, tags: master }
+    - { role: cni, tags: cni }
+
+- hosts: worker
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - vars/main.yml
+  roles:
+    - { role: kubernetes/node, tags: node }
+
+- hosts: master
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - vars/main.yml
+  tasks:
+    - name: "Helm role"
+      include_role:
+        name: helm
+      when: "additional_features.helm"
+      run_once: yes
+      tags: helm
+
+    - name: "Healthcheck role"
+      include_role:
+        name: healthcheck
+      when: "additional_features.healthcheck"
+      run_once: yes
+      tags: healthcheck
+

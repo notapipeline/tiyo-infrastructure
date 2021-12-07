@@ -1,0 +1,12 @@
+---
+# Telegraf handlers
+
+- name: restart_telegraf
+  service:
+    name: telegraf
+    state: restarted
+
+- name: restart_syslog
+  service:
+    name: rsyslog
+    state: restarted

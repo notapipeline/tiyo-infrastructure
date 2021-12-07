@@ -2,6 +2,17 @@
 This repository will set up a Kubernetes cluster for executing an RNA Sequence pipeline, then load the data and
 execute the pipeline according to the structure provided.
 
+## Ansible VMWARE
+export VMWARE\_PROXY\_HOST=
+export VMWARE\_PROXY\_PORT=
+export VMWARE\_HOST=
+export VMWARE\_USERNAME=
+export VMWARE\_PASSWORD=
+
+## Ansible SSH
+export SSH\_COMPARTMENT\_KEY
+export SSH\_COMPARTMENT\_USER
+
 ## Cluster components:
 
 - Kubernetes master
@@ -12,7 +23,6 @@ execute the pipeline according to the structure provided.
 
 - Kubernetes dashboard
 - Metrics server
-- Redis store for queue management
 - InfluxDB for monitoring
 - Processing deployments
   - fastqc

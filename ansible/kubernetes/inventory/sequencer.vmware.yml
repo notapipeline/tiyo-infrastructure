@@ -1,0 +1,23 @@
+plugin: community.vmware.vmware_vm_inventory
+
+cache: yes
+cache_plugin: ansible.builtin.jsonfile
+cache_timeout: 7200
+cache_connection: /tmp/ansible_inventory
+
+hostname: msdplamvc001.soc.mssportal.net
+validate_certs: False
+strict: True
+with_tags: True
+hostnames:
+  - 'config.name'
+properties:
+  - 'config.name'
+  - 'guest.ipAddress'
+keyed_groups:
+  - key: tag_category.sequencer_categories
+    prefix: ""
+    separator: ""
+with_nested_properties: True
+filters:
+  - "tag_category.sequencer is defined"

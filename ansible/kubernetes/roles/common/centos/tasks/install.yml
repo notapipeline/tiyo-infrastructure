@@ -1,0 +1,63 @@
+---
+# Agent tasks
+
+- name: Wait for hosts to be up
+  wait_for_connection:
+    sleep: 5
+    timeout: 300
+
+- name: Upgrade to latest packages
+  yum:
+    update_only: yes
+    name: '*'
+    state: latest
+    exclude:
+      - kubeadm
+      - kubectl
+      - kubelet
+  ignore_errors: true
+
+- name: Install yum utils
+  yum:
+    name: [
+      'yum-utils',
+      'device-mapper-persistent-data',
+      'lvm2',
+      'epel-release',
+      'tcpdump',
+      'net-snmp',
+      'telnet',
+      'wget',
+      'lrzsz',
+      'net-snmp-utils',
+      'iproute-tc',
+      'nfs-utils',
+    ]
+
+- name: Stop firewall services
+  service:
+    name: "{{ item }}"
+    enabled: no
+    state: stopped
+  loop:
+    - firewalld
+    - iptables
+  ignore_errors: true
+
+- name: Disable SELinux now
+  shell:
+    cmd: setenforce 0
+  changed_when: false
+  failed_when: false
+
+- name: Disable SELinux on boot
+  copy:
+    dest: /etc/selinux/config
+    content: |
+      SELINUX=permissive
+      SELINUXTYPE=targeted
+
+- name: Upgrade to latest packages
+  yum:
+    update_only: yes
+
